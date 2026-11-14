@@ -1,0 +1,11 @@
+# meta-webhook is called by Meta, which cannot send a Supabase JWT. It
+# authenticates every request with Meta's HMAC signature instead.
+[functions.meta-webhook]
+verify_jwt = false
+
+# These two check the caller's login themselves (they need the user id).
+[functions.send-message]
+verify_jwt = false
+
+[functions.ai-agent]
+verify_jwt = false

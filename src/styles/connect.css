@@ -1,0 +1,70 @@
+/* XS Connect additions on top of the shared XS design system (app.css). */
+
+.nav-count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center;
+  background: var(--bad-vivid); color: #fff; font-size: var(--t-xs); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tabbar .nav-count { position: absolute; margin: 0; top: 4px; left: calc(50% + 6px); }
+.tabbar a { position: relative; }
+
+/* Channel chip: text, not colour alone, names the channel. */
+.ch { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; font-size: var(--t-xs); font-weight: 600;
+  background: var(--paper-2); color: var(--graphite); flex: none; }
+.ch.whatsapp { background: var(--ok-bg); color: var(--ok); }
+.ch.instagram { background: var(--warn-bg); color: var(--warn); }
+.ch.messenger { background: var(--info-bg); color: var(--info); }
+
+.pill.qualified, .pill.confirmed { background: var(--info-bg); color: var(--info); }
+.pill.proposal, .pill.pending { background: var(--warn-bg); color: var(--warn); }
+.pill.won, .pill.paid, .pill.fulfilled { background: var(--ok-bg); color: var(--ok); }
+.pill.lost, .pill.cancelled { background: var(--paper-2); color: var(--graphite); }
+.pill.ai { background: var(--paper-2); color: var(--ink); }
+.pill.you { background: var(--bad-bg); color: var(--bad); }
+
+.item.row-link { color: inherit; text-decoration: none; }
+.item .preview { color: var(--graphite); font-size: var(--t-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .when { font-size: var(--t-xs); color: var(--graphite); font-variant-numeric: tabular-nums; }
+.item.unread .title { font-weight: 700; }
+button.item, .item.plain-btn { width: 100%; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+
+/* ---------- Chat ---------- */
+.chat { display: flex; flex-direction: column; height: calc(100dvh - 150px); min-height: 420px; background: var(--paper); border-radius: var(--r-lg); overflow: hidden; }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--hair); }
+.chat-head .who { flex: 1; min-width: 0; display: grid; }
+.chat-head .who strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-head .who span { font-size: var(--t-sm); color: var(--graphite); display: flex; gap: 8px; align-items: center; }
+.chat-body { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+.bubble { max-width: min(78%, 560px); padding: 9px 13px; border-radius: 18px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
+.bubble.in { align-self: flex-start; background: var(--paper-2); border-bottom-left-radius: 6px; }
+.bubble.out { align-self: flex-end; background: var(--primary); color: var(--on-primary); border-bottom-right-radius: 6px; }
+.bubble.system { align-self: center; max-width: 90%; background: none; color: var(--graphite); font-size: var(--t-sm); text-align: center; padding: 4px 8px; }
+.bubble .by { display: block; font-size: var(--t-xs); opacity: 0.7; margin-top: 3px; }
+.bubble.failed { background: var(--bad-bg); color: var(--bad); }
+.draft { align-self: stretch; border: 1px dashed var(--hair-strong); border-radius: var(--r); padding: 12px; display: grid; gap: 10px; background: var(--canvas); }
+.draft .label { font-size: var(--t-sm); font-weight: 600; color: var(--graphite); }
+.chat-foot { border-top: 1px solid var(--hair); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); display: grid; gap: 8px; }
+.composer { display: flex; gap: 8px; align-items: flex-end; }
+.composer textarea { flex: 1; resize: none; max-height: 140px; min-height: 44px; }
+.switch { display: inline-flex; align-items: center; gap: 8px; font-size: var(--t-sm); font-weight: 600; background: none; border: 0; color: inherit; cursor: pointer; padding: 6px 0; }
+.switch i { width: 40px; height: 24px; border-radius: 999px; background: var(--hair-strong); position: relative; transition: background-color 160ms ease; flex: none; }
+.switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform 160ms var(--ease-out); }
+.switch[aria-pressed="true"] i { background: var(--ok-vivid); }
+.switch[aria-pressed="true"] i::after { transform: translateX(16px); }
+
+@media (max-width: 719px) {
+  .shell.in-chat .tabbar, .shell.in-chat .topbar { display: none; }
+  .shell.in-chat .main { padding: 0; }
+  .shell.in-chat .chat { height: 100dvh; border-radius: 0; }
+}
+
+/* ---------- Small layout helpers ---------- */
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.checklist li { display: flex; gap: 12px; align-items: center; padding: 10px 4px; }
+.checklist .tick { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--hair-strong); flex: none; display: grid; place-items: center; }
+.checklist .done .tick { background: var(--ok-vivid); border-color: var(--ok-vivid); color: #fff; }
+.checklist .done .txt { color: var(--graphite); }
+.checklist a { margin-left: auto; font-size: var(--t-sm); font-weight: 600; color: var(--ink); }
+.bars { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.bars li { display: grid; grid-template-columns: 110px 1fr max-content; gap: 12px; align-items: center; font-size: var(--t-sm); }
+.bars .track { height: 8px; border-radius: 999px; background: var(--paper-2); overflow: hidden; }
+.bars .fill { display: block; height: 100%; border-radius: 999px; background: var(--ink); min-width: 2px; }
+.codebox { font-family: var(--mono); font-size: var(--t-sm); background: var(--paper-2); border-radius: var(--r); padding: 10px 12px; overflow-wrap: anywhere; user-select: all; }
+.lp .chat-demo { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
