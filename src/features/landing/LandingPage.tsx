@@ -33,52 +33,97 @@ function useScrollProgress<T extends HTMLElement>() {
 
 type Ch = 'whatsapp' | 'instagram' | 'messenger';
 const CH: Record<Ch, string> = { whatsapp: 'WhatsApp', instagram: 'Instagram', messenger: 'Messenger' };
+type Line = { who: 'in' | 'ai' | 'note'; text: string };
+type Convo = { name: string; ch: Ch; lines: Line[]; lead: { at: number; k: string; v: string }[]; ends: 'AI' | 'You' };
 
-const FEED: { ch: Ch; name: string; text: string; did: string }[] = [
-  { ch: 'whatsapp', name: 'Anjali Menon', text: 'Monthly package ethraya?', did: 'Replied with the price' },
-  { ch: 'instagram', name: 'Rahul K', text: 'Saw your reel. Do you deliver to Kochi?', did: 'Answered, asked for WhatsApp number' },
-  { ch: 'messenger', name: 'Fathima R', text: 'Is the 3 month plan refundable?', did: 'Answered from your policy' },
-  { ch: 'whatsapp', name: 'Arjun Das', text: 'Book 2 for Saturday please', did: 'Order XC-0043 taken, ₹1,800' },
-  { ch: 'instagram', name: 'Sneha Thomas', text: 'Any discount for 40 people?', did: 'Handed to your team' },
-  { ch: 'whatsapp', name: 'Vishnu P', text: 'I will decide tomorrow', did: 'Follow-up set for 10:00 am' },
+const CONVOS: Convo[] = [
+  {
+    name: 'Anjali Menon', ch: 'whatsapp', ends: 'AI',
+    lines: [
+      { who: 'in', text: 'Hi, monthly package ethraya?' },
+      { who: 'ai', text: 'Hi Anjali! Monthly package ₹2,500 aanu, ellam included. Book cheyyatte?' },
+      { who: 'in', text: 'Ok, 2 perkku book cheytho' },
+      { who: 'ai', text: 'Booked! Order XC-0042, total ₹5,000. Payment link ippol ayakkam.' },
+    ],
+    lead: [{ at: 1, k: 'Stage', v: 'New' }, { at: 2, k: 'Wants', v: 'Monthly package' }, { at: 4, k: 'Order', v: 'XC-0042' }, { at: 4, k: 'Total', v: '₹5,000' }],
+  },
+  {
+    name: 'Rahul Krishnan', ch: 'instagram', ends: 'AI',
+    lines: [
+      { who: 'in', text: 'Saw your reel. Do you deliver to Kochi?' },
+      { who: 'ai', text: 'Yes, anywhere in Kerala in 2 to 4 days. May I have your WhatsApp number to send the details?' },
+      { who: 'in', text: '98470 00021' },
+      { who: 'ai', text: 'Thank you, Rahul. Sending the catalogue there now.' },
+    ],
+    lead: [{ at: 1, k: 'Stage', v: 'New' }, { at: 2, k: 'Wants', v: 'Delivery to Kochi' }, { at: 3, k: 'WhatsApp', v: 'Saved' }, { at: 4, k: 'Score', v: '70 / 100' }],
+  },
+  {
+    name: 'Sneha Thomas', ch: 'messenger', ends: 'You',
+    lines: [
+      { who: 'in', text: 'We are 40 people. Any corporate rate?' },
+      { who: 'note', text: 'Handed to your team: deal above your ₹50,000 limit' },
+      { who: 'ai', text: 'Thanks, Sneha. A team member will reply here with our corporate plan shortly.' },
+    ],
+    lead: [{ at: 1, k: 'Stage', v: 'Qualified' }, { at: 1, k: 'Wants', v: 'Corporate, 40 people' }, { at: 2, k: 'Handled by', v: 'Your team' }],
+  },
 ];
 
-function LiveInbox() {
-  const n = useRef(3);
-  const [rows, setRows] = useState(() => [2, 1, 0].map((i) => ({ key: i, ...FEED[i], done: true })));
-  const [answered, setAnswered] = useState(128);
+/** The product itself, playing three real conversations. Pauses on request. */
+function HeroApp() {
+  const still = reduced();
+  const [ci, setCi] = useState(0);
+  const [shown, setShown] = useState(still ? CONVOS[0].lines.length : 0);
+  const [typing, setTyping] = useState(false);
+  const [paused, setPaused] = useState(still);
+  const convo = CONVOS[ci];
   useEffect(() => {
-    if (reduced()) return;
-    let settle = 0;
-    const id = setInterval(() => {
-      if (document.visibilityState !== 'visible') return;
-      const k = n.current++;
-      setRows((r) => [{ key: k, ...FEED[k % FEED.length], done: false }, ...r].slice(0, 4));
-      settle = window.setTimeout(() => {
-        setRows((r) => r.map((x) => (x.key === k ? { ...x, done: true } : x)));
-        setAnswered((a) => a + 1);
-      }, 1500);
-    }, 3200);
-    return () => { clearInterval(id); clearTimeout(settle); };
-  }, []);
+    if (paused) return;
+    let t = 0;
+    if (shown < convo.lines.length) {
+      const next = convo.lines[shown];
+      if (next.who === 'ai' && !typing) t = window.setTimeout(() => setTyping(true), 500);
+      else t = window.setTimeout(() => { setTyping(false); setShown((n) => n + 1); }, next.who === 'ai' ? 1100 : 1300);
+    } else {
+      t = window.setTimeout(() => { setCi((i) => (i + 1) % CONVOS.length); setShown(0); }, 3200);
+    }
+    return () => clearTimeout(t);
+  }, [paused, shown, typing, convo]);
+  const done = shown >= convo.lines.length;
   return (
-    <div className="inbox-demo" aria-label="Live preview of the XS Connect inbox">
-      <div className="inbox-demo-head">
-        <span>Inbox</span>
-        <span className="num">{answered} answered today</span>
+    <div className="app" aria-label="XS Connect inbox, playing sample conversations">
+      <div className="app-bar">
+        <span className="dots" aria-hidden><i /><i /><i /></span>
+        <span className="app-title">XS Connect</span>
+        <button className="app-pause" onClick={() => setPaused((p) => !p)} aria-pressed={paused}>{paused ? 'Play' : 'Pause'}</button>
       </div>
-      <ul>
-        {rows.map((r, i) => (
-          <li key={r.key} className={i === 0 ? 'arrive' : ''}>
-            <span className={`chip ${r.ch}`}>{CH[r.ch]}</span>
-            <span className="fn">{r.name}</span>
-            <span className="msg">{r.text}</span>
-            <span className={`act ${r.done ? 'done' : ''}`}>
-              {r.done ? r.did : <span className="typing" aria-label="AI is replying"><i /><i /><i /></span>}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div className="app-body">
+        <ul className="app-list" aria-label="Conversations">
+          {CONVOS.map((c, i) => {
+            const active = i === ci;
+            const last = active ? convo.lines[Math.max(0, shown - 1)]?.text ?? '' : c.lines[c.lines.length - 1].text;
+            const who = active ? (done ? c.ends : 'AI') : c.ends;
+            return (
+              <li key={c.name} className={active ? 'on' : ''}>
+                <span className="avatar-s" aria-hidden>{c.name.split(' ').map((w) => w[0]).join('')}</span>
+                <span className="li-main"><b>{c.name}</b><span>{last || 'New message'}</span></span>
+                <span className="li-end"><span className={`chip ${c.ch}`}>{CH[c.ch]}</span><span className={`tag ${who === 'You' ? 'you' : ''}`}>{who}</span></span>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="app-chat">
+          <div className="app-chat-head"><b>{convo.name}</b><span className={`chip ${convo.ch}`}>{CH[convo.ch]}</span></div>
+          <div className="app-chat-body" key={ci}>
+            {convo.lines.slice(0, shown).map((l, i) => <div key={i} className={`b ${l.who} fresh`}>{l.text}{l.who === 'ai' && <small>AI</small>}</div>)}
+            {typing && <div className="b ai typing-b"><span className="typing" aria-label="AI is replying"><i /><i /><i /></span></div>}
+          </div>
+          <div className="app-compose" aria-hidden><span>Reply…</span></div>
+        </div>
+        <dl className="app-lead" aria-label="Lead details">
+          <div className="lead-title">Lead</div>
+          {convo.lead.filter((f) => f.at <= shown).map((f) => <div key={f.k} className="fresh-row"><dt>{f.k}</dt><dd>{f.v}</dd></div>)}
+        </dl>
+      </div>
     </div>
   );
 }
@@ -150,7 +195,7 @@ function Story() {
       <div className="story-stage">
         <div className="wrap story-grid">
           <div className="story-copy">
-            <h2>Follow one lead from “hi” to paid.</h2>
+            <h2>One lead, from first message to paid order.</h2>
             <ol>
               {STORY.map((s, i) => (
                 <li key={s.title} className={i === active ? 'on' : i < active ? 'past' : ''} aria-current={i === active ? 'step' : undefined}>
@@ -173,6 +218,43 @@ function Story() {
               {step.card.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
             </dl>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------- approvals */
+
+function Approvals() {
+  const [auto, setAuto] = useState(false);
+  const [sent, setSent] = useState(false);
+  return (
+    <section id="control" className="control">
+      <div className="wrap control-in">
+        <div className="control-copy">
+          <h2>Drafts until you trust the AI.</h2>
+          <p>A new brand starts with autopilot off. The AI writes each reply and a person on your team approves it. Switch autopilot on when the drafts read right, and take any chat back with one tap.</p>
+          <ul>
+            <li>Set a deal amount above which a person always replies</li>
+            <li>Write the promises the AI must never make</li>
+            <li>See every AI order and handover in the audit trail</li>
+          </ul>
+        </div>
+        <div className="control-ui" aria-label="Try the draft approval">
+          <button className="switch-l" aria-pressed={auto} onClick={() => { setAuto((a) => !a); setSent(false); }}>
+            <i aria-hidden /> <span>Autopilot</span> <b>{auto ? 'On' : 'Off'}</b>
+          </button>
+          <div className="b in">Is the 3 month plan refundable?</div>
+          {auto || sent ? (
+            <div className="b ai fresh">Yes, a full refund within the first 7 days.<small>{auto ? 'AI, sent on its own' : 'AI, approved by you'}</small></div>
+          ) : (
+            <div className="draft-l">
+              <span>AI draft</span>
+              <p>Yes, a full refund within the first 7 days.</p>
+              <button className="lbtn dark" onClick={() => setSent(true)}>Approve and send</button>
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -266,7 +348,9 @@ export function LandingPage() {
     const on = () => setScrolled(window.scrollY > 24);
     on();
     window.addEventListener('scroll', on, { passive: true });
-    return () => window.removeEventListener('scroll', on);
+    // The landing page scrolls without a visible scrollbar; the app keeps its own.
+    document.documentElement.classList.add('on-landing');
+    return () => { window.removeEventListener('scroll', on); document.documentElement.classList.remove('on-landing'); };
   }, []);
 
   return (
@@ -274,82 +358,87 @@ export function LandingPage() {
       <header className={`nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="wrap nav-in">
           <Link to="/" className="nav-brand" aria-label="XS Connect home"><Logo onDark width={118} /><span>Connect</span></Link>
-          <nav aria-label="Sections"><a href="#story">How it works</a><a href="#features">Features</a><a href="#price">Pricing</a><a href="#faq">Questions</a></nav>
+          <nav aria-label="Sections"><a href="#story">How it works</a><a href="#features">Features</a><a href="#price">Price</a><a href="#faq">Questions</a></nav>
           <div className="nav-cta">
             <Link className="lbtn quiet" to="/login">Sign in</Link>
-            <Link className="lbtn solid" to="/login?mode=signup">Start free</Link>
+            <Link className="lbtn solid" to="/login?mode=signup">Try it free</Link>
           </div>
         </div>
       </header>
 
-      <section className="hero">
-        <div className="wrap hero-in">
-          <div className="hero-copy">
-            <h1><span>Every lead</span><span>answered.</span></h1>
-            <p>WhatsApp, Instagram and Facebook in one window, with an AI that knows your business. It replies, takes the order and follows up. You step in when it matters.</p>
-            <div className="hero-cta">
-              <Link className="lbtn solid big" to="/login?mode=signup">Start free</Link>
-              <a className="lbtn ghost big" href="#story">See how it works</a>
+      <main>
+        <section className="hero">
+          <div className="wrap hero-in">
+            <div className="hero-head">
+              <h1>The AI sales inbox for WhatsApp, Instagram and Facebook.</h1>
+              <div className="hero-side">
+                <p>Every enquiry gets a reply in seconds, in the customer’s language, with your prices. The AI takes the order and follows up. Your team steps in for the big ones.</p>
+                <div className="hero-cta">
+                  <Link className="lbtn solid big" to="/login?mode=signup">Try it free</Link>
+                  <a className="lbtn ghost big" href="#story">See how it works</a>
+                </div>
+                <p className="fine">100 AI conversations free. Then ₹5 a conversation, no monthly fee.</p>
+              </div>
             </div>
-            <p className="fine">First 100 AI conversations free. No card needed.</p>
+            <HeroApp />
           </div>
-          <LiveInbox />
-        </div>
-      </section>
+        </section>
 
-      <Story />
+        <Story />
+        <Approvals />
 
-      <section id="features" className="features">
-        <div className="wrap">
-          <h2>Everything in the window.</h2>
-          <div className="groups">
-            {GROUPS.map((g) => (
-              <section key={g.name} className="fgroup">
-                <h3>{g.name}</h3>
-                <dl>
-                  {g.items.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}
-                </dl>
-              </section>
-            ))}
+        <section id="features" className="features">
+          <div className="wrap">
+            <h2>Every feature in XS Connect.</h2>
+            <div className="groups">
+              {GROUPS.map((g) => (
+                <section key={g.name} className="fgroup">
+                  <h3>{g.name}</h3>
+                  <dl>
+                    {g.items.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}
+                  </dl>
+                </section>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Who />
+        <Who />
 
-      <section id="price" className="price">
-        <div className="wrap price-in">
-          <div>
-            <h2>No monthly fee.</h2>
-            <p>You pay when the AI actually talks to a customer. Nothing for quiet days, nothing for your team’s own replies.</p>
+        <section id="price" className="price">
+          <div className="wrap price-in">
+            <div>
+              <h2>One price: ₹5 per AI conversation.</h2>
+              <p>You pay when the AI talks to a customer. Quiet days cost nothing, and your team’s own replies are free.</p>
+            </div>
+            <div className="price-card">
+              <div className="amount"><span className="num">₹5</span><span>per AI conversation</span></div>
+              <ul>
+                <li>One customer in one day counts once</li>
+                <li>First 100 conversations free</li>
+                <li>Any number of team members and channels</li>
+                <li>Meta bills WhatsApp’s own message charges to you</li>
+              </ul>
+              <Link className="lbtn dark big" to="/login?mode=signup">Try it free</Link>
+            </div>
           </div>
-          <div className="price-card">
-            <div className="amount"><span className="num">₹5</span><span>per AI conversation</span></div>
-            <ul>
-              <li>One customer, one day = one conversation</li>
-              <li>First 100 conversations free</li>
-              <li>Unlimited team members and channels</li>
-              <li>WhatsApp’s own message charges are billed by Meta</li>
-            </ul>
-            <Link className="lbtn dark big" to="/login?mode=signup">Start free</Link>
+        </section>
+
+        <section id="faq" className="faq-section">
+          <div className="wrap narrow">
+            <h2>Questions owners ask</h2>
+            <Faq />
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="faq" className="faq-section">
-        <div className="wrap narrow">
-          <h2>Questions owners ask</h2>
-          <Faq />
-        </div>
-      </section>
-
-      <section className="closing">
-        <div className="wrap">
-          <h2>Tonight’s enquiries will not wait till morning.</h2>
-          <p>Set up your brand, try it on sample chats, connect your channels when you are ready.</p>
-          <Link className="lbtn solid big" to="/login?mode=signup">Start free</Link>
-        </div>
-      </section>
+        <section className="closing">
+          <div className="wrap">
+            <h2>Tonight’s enquiries get answered tonight.</h2>
+            <p>Set up your brand in a few minutes and test the AI on sample chats. Connect your channels when you are ready.</p>
+            <Link className="lbtn solid big" to="/login?mode=signup">Try it free</Link>
+          </div>
+        </section>
+      </main>
 
       <footer className="foot">
         <div className="wrap foot-in">
