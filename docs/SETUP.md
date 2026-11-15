@@ -50,3 +50,11 @@ Requires Meta Business Verification of Xelorsoft and App Review for advanced acc
 ## 4. GitHub Pages
 
 `.github/workflows/pages.yml` tests, builds and pushes `dist/` to the `gh-pages` branch on every push to `main`. In the repository settings, set Pages to deploy from the `gh-pages` branch.
+
+## Deploying the edge functions
+
+Each function's `index.ts` is deployed on its own. Its imports of `../_shared/*.ts` are replaced with links to the same files in this repository, pinned to one commit:
+
+`https://raw.githubusercontent.com/abzops/xs-connect/<commit>/supabase/functions/_shared/<file>.ts`
+
+To release a change to shared code: push it, then redeploy the functions with the new commit id in those links. The repository has to stay public for this to work; with a private repository, deploy with the Supabase CLI instead (`supabase functions deploy`).
