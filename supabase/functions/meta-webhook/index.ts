@@ -2,7 +2,7 @@
 // GET: Meta's one-time verification. POST: signed events. Fails closed: with no
 // app secret configured, or a bad signature, nothing is accepted.
 import { parseWebhook, verifySignature } from '../_shared/meta.ts';
-import { runAgent, serviceClient } from '../_shared/run.ts';
+import { runAgent, serviceClient, transcribeVoice } from '../_shared/run.ts';
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 
@@ -42,9 +42,17 @@ Deno.serve(async (req: Request) => {
     // A database failure must make Meta retry, so the message is not lost.
     if (error) return new Response('Temporary failure', { status: 500 });
     const r = data as { conversation_id?: string; message_id?: string; ai_enabled?: boolean };
-    if (r.conversation_id && r.message_id && r.ai_enabled) {
-      work.push(runAgent(db, r.conversation_id, { waitMs: 6000, expectMessageId: r.message_id }).catch(() => {}));
-    }
+    if (!r.conversation_id || !r.message_id) continue;
+    const { conversation_id, message_id, ai_enabled } = r;
+    work.push((async () => {
+      if (ev.mediaRef) await db.rpc('service_attach_media', { p_message: message_id, p_ref: ev.mediaRef, p_mime: ev.mediaMime });
+      // The pause that gathers a customer's quick messages also covers the transcription.
+      const pause = new Promise((done) => setTimeout(done, 6000));
+      if (ev.msgKind === 'audio' && ev.mediaRef) await transcribeVoice(db, message_id);
+      if (!ai_enabled) return;
+      await pause;
+      await runAgent(db, conversation_id, { expectMessageId: message_id });
+    })().catch(() => {}));
   }
   // Answer Meta at once; the AI turn continues in the background.
   const all = Promise.allSettled(work);

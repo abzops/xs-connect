@@ -69,3 +69,5 @@ button.item, .item.plain-btn { width: 100%; background: none; border: 0; text-al
 .codebox { font-family: var(--mono); font-size: var(--t-sm); background: var(--paper-2); border-radius: var(--r); padding: 10px 12px; overflow-wrap: anywhere; user-select: all; }
 /* Phones and narrow tablets keep the top bar above a chat until the chat takes the full screen. */
 @media (min-width: 720px) and (max-width: 1023px) { .chat { height: calc(100dvh - 130px); } }
+.bubble .voice-tag { display: flex; align-items: center; gap: 5px; font-size: var(--t-xs); font-weight: 600; opacity: 0.75; margin-bottom: 3px; }
+.bubble em { opacity: 0.8; }

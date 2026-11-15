@@ -1,7 +1,8 @@
 // One AI turn for one conversation: load context, think, act, reply, deliver, meter.
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { buildSystemPrompt, runAgentLoop, toModelMessages, type AgentContext, type ToolCall } from './agent.ts';
-import { anthropicModel, withFallback } from './llm.ts';
+import { buildModel, chooseModel } from './llm.ts';
+import { fetchVoice, transcribe, type VoiceTarget } from './voice.ts';
 import { sendToMeta, type SendTarget } from './meta.ts';
 
 export const GRAPH_VERSION = Deno.env.get('META_GRAPH_VERSION') ?? 'v24.0';
@@ -66,21 +67,25 @@ export async function runAgent(db: SupabaseClient, conversationId: string, opts:
   if (!ctx.run) return { outcome: 'skipped', detail: ctx.why };
   if (opts.expectMessageId && ctx.last_message_id !== opts.expectMessageId) return { outcome: 'skipped', detail: 'a newer message arrived' };
 
-  const key = Deno.env.get('ANTHROPIC_API_KEY');
-  const modelName = Deno.env.get('AI_MODEL') ?? 'claude-haiku-5-5';
-  const strongName = Deno.env.get('AI_MODEL_ESCALATION') ?? '';
-  const log = (outcome: RunOutcome['outcome'], r: { tools: string[]; inputTokens: number; outputTokens: number; cachedTokens: number } | null, detail?: string) =>
-    call(db, 'service_log_run', {
-      p_conversation: conversationId, p_model: modelName, p_input: r?.inputTokens ?? 0, p_output: r?.outputTokens ?? 0,
-      p_cached: r?.cachedTokens ?? 0, p_tools: r?.tools ?? [], p_outcome: outcome, p_detail: detail ?? null,
-    }).catch(() => {});
+  const choice = chooseModel((n) => Deno.env.get(n));
+  const modelName = 'error' in choice ? 'none' : choice.model;
+  const started = Date.now();
+  const log = async (outcome: RunOutcome['outcome'], r: { tools: string[]; inputTokens: number; outputTokens: number; cachedTokens: number } | null, detail?: string) => {
+    try {
+      await call(db, 'service_log_run', {
+        p_conversation: conversationId, p_model: modelName, p_input: r?.inputTokens ?? 0, p_output: r?.outputTokens ?? 0,
+        p_cached: r?.cachedTokens ?? 0, p_tools: r?.tools ?? [], p_outcome: outcome, p_detail: detail ?? null,
+      });
+      await call(db, 'service_log_latency', { p_conversation: conversationId, p_latency_ms: Date.now() - started });
+    } catch { /* logging must never break a reply */ }
+  };
 
-  if (!key) {
-    await log('error', null, 'ANTHROPIC_API_KEY is not set');
-    return { outcome: 'error', detail: 'The AI key is not set up yet. Add ANTHROPIC_API_KEY to the project secrets.' };
+  if ('error' in choice) {
+    await log('error', null, choice.error);
+    return { outcome: 'error', detail: `The AI key is not set up yet: ${choice.error}. Add it to the project secrets.` };
   }
   try {
-    const model = withFallback(anthropicModel(key, modelName), strongName ? anthropicModel(key, strongName) : null);
+    const model = buildModel(choice);
     const result = await runAgentLoop(buildSystemPrompt(ctx, new Date()), toModelMessages(ctx.messages), model, toolRunner(db, conversationId));
     if (!result.reply) {
       await log(result.handedOff ? 'handoff' : 'error', result, 'no reply text');
@@ -99,5 +104,26 @@ export async function runAgent(db: SupabaseClient, conversationId: string, opts:
     const detail = e instanceof Error ? e.message : 'unknown error';
     await log('error', null, detail);
     return { outcome: 'error', detail: 'The AI could not reply. The chat is waiting for a person.' };
+  }
+}
+
+/** Turns one inbound voice note into text and stores it as the message body. Never throws. */
+export async function transcribeVoice(db: SupabaseClient, messageId: string): Promise<{ ok: boolean; detail?: string }> {
+  try {
+    const target = await call<VoiceTarget & { error?: string }>(db, 'service_voice_target', { p_message: messageId });
+    if (target.error) return { ok: false, detail: target.error };
+    const audio = await fetchVoice(target, GRAPH_VERSION);
+    if ('error' in audio) { console.error('voice note', messageId, audio.error); return { ok: false, detail: audio.error }; }
+    const gem = (Deno.env.get('AI_MODEL') ?? '').startsWith('gemini') ? Deno.env.get('AI_MODEL') : undefined;
+    const t = await transcribe(audio, {
+      sarvam: Deno.env.get('SARVAM_API_KEY'), gemini: Deno.env.get('GEMINI_API_KEY'),
+      sarvamModel: Deno.env.get('STT_MODEL'), geminiModel: gem,
+    });
+    if (!t.text) { console.error('voice note', messageId, t.error); return { ok: false, detail: t.error }; }
+    await call(db, 'service_set_transcript', { p_message: messageId, p_body: t.text, p_by: t.by });
+    return { ok: true };
+  } catch (e) {
+    console.error('voice note', messageId, e instanceof Error ? e.message : e);
+    return { ok: false, detail: 'voice note could not be read' };
   }
 }

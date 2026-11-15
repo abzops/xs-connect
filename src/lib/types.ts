@@ -34,6 +34,7 @@ export type MessageStatus = 'received' | 'draft' | 'queued' | 'sent' | 'delivere
 export type Message = {
   id: string; conversation_id: string; direction: 'in' | 'out'; sender: 'contact' | 'ai' | 'staff' | 'system';
   kind: string; body: string; status: MessageStatus; error: string | null; created_at: string;
+  media_ref: string | null; transcribed_by: string | null;
 };
 
 export type LeadStage = 'new' | 'qualified' | 'proposal' | 'won' | 'lost';

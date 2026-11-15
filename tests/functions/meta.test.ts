@@ -67,3 +67,21 @@ describe('buildSendRequest', () => {
     expect(JSON.parse(ig.init.body as string).tag).toBeUndefined();
   });
 });
+
+describe('voice notes in webhooks', () => {
+  it('carries the WhatsApp media id and type', () => {
+    const [ev] = parseWebhook({ object: 'whatsapp_business_account', entry: [{ changes: [{ value: {
+      metadata: { phone_number_id: 'P1' }, contacts: [{ wa_id: '919999999999', profile: { name: 'Anu' } }],
+      messages: [{ from: '919999999999', id: 'wamid.V1', timestamp: '1794758000', type: 'audio', audio: { id: 'MEDIA9', mime_type: 'audio/ogg; codecs=opus', voice: true } }],
+    } }] }] });
+    expect(ev).toMatchObject({ type: 'message', msgKind: 'audio', body: '', mediaRef: 'MEDIA9', mediaMime: 'audio/ogg; codecs=opus' });
+  });
+  it('carries the Instagram attachment link, and nothing for plain text', () => {
+    const events = parseWebhook({ object: 'instagram', entry: [{ id: 'IG1', messaging: [
+      { sender: { id: 'U1' }, timestamp: 1794758000000, message: { mid: 'm1', attachments: [{ type: 'audio', payload: { url: 'https://lookaside.fbsbx.com/ig_messaging_cdn/?asset_id=7' } }] } },
+      { sender: { id: 'U1' }, timestamp: 1794758001000, message: { mid: 'm2', text: 'hello' } },
+    ] }] });
+    expect(events[0]).toMatchObject({ msgKind: 'audio', mediaRef: 'https://lookaside.fbsbx.com/ig_messaging_cdn/?asset_id=7' });
+    expect(events[1]).toMatchObject({ msgKind: 'text', mediaRef: null });
+  });
+});

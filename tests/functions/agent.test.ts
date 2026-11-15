@@ -76,3 +76,13 @@ describe('runAgentLoop', () => {
     expect(r.reply).toBe('');
   });
 });
+
+describe('voice notes in the chat history', () => {
+  it('marks a transcript so the model knows it was spoken', () => {
+    expect(toModelMessages([{ direction: 'in', sender: 'contact', kind: 'audio', body: 'രണ്ട് Starter plan വേണം' }]))
+      .toEqual([{ role: 'user', content: '[Voice note] രണ്ട് Starter plan വേണം' }]);
+  });
+  it('tells the model to confirm orders taken from a voice note', () => {
+    expect(buildSystemPrompt(ctx, new Date())).toContain('[Voice note] are automatic transcripts');
+  });
+});

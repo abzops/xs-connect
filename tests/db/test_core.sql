@@ -136,6 +136,24 @@ select t.eq((select status from public.staff_send_message(t.id('wsB'), t.id('dem
 select t.eq((public.workspace_overview(t.id('wsB'), 30)->>'leads_open')::int, 3, 'overview counts leads');
 
 reset role;
+-- ------------------------------------------------------------ voice notes
+set role service_role;
+insert into t.ids select 'voice', (public.service_ingest('whatsapp', '1111', '919000000001', 'Asha', '+919000000001', 'wamid.voice1', 'audio', '', now())->>'message_id')::uuid;
+select t.eq(public.service_voice_target(t.id('voice'))->>'error', 'no voice note', 'no media, nothing to transcribe');
+select public.service_attach_media(t.id('voice'), 'MEDIA1', 'audio/ogg; codecs=opus');
+select t.eq(public.service_voice_target(t.id('voice'))->>'media_ref', 'MEDIA1', 'transcriber gets the media id');
+select t.eq((public.service_voice_target(t.id('voice'))->>'token') is not null, true, 'transcriber gets the channel token');
+select public.service_set_transcript(t.id('voice'), '  Premium plan rate ethra?  ', 'saaras:v4');
+select t.eq((select body || '|' || transcribed_by from public.messages where id = t.id('voice')), 'Premium plan rate ethra?|saaras:v4', 'transcript becomes the message body');
+select t.eq((select last_preview from public.conversations c join public.messages m on m.conversation_id = c.id where m.id = t.id('voice')), 'Voice note: Premium plan rate ethra?', 'inbox preview shows the words');
+select public.service_set_transcript(t.id('voice'), 'something else', 'x');
+select t.eq((select body from public.messages where id = t.id('voice')), 'Premium plan rate ethra?', 'a transcript is written once');
+select t.eq(public.service_voice_target(t.id('voice'))->>'error', 'already transcribed', 'no second transcription');
+reset role;
+set role authenticated;
+select t.fails($$select public.service_voice_target(t.id('voice'))$$, 'permission denied', 'staff cannot read channel tokens through the transcriber');
+
+reset role;
 -- ------------------------------------------------------------ pitch demo (administrator only)
 select t.eq(private.seed_pitch(t.id('wsB')), 'seeded 12 conversations', 'pitch demo seeds');
 select t.eq(private.seed_pitch(t.id('wsB')), 'already seeded', 'pitch demo seeds once');

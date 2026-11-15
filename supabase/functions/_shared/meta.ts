@@ -14,6 +14,9 @@ export type InboundMessage = {
   msgKind: 'text' | 'image' | 'audio' | 'video' | 'document' | 'other';
   body: string;
   sentAt: string;
+  /** WhatsApp media id, or the attachment URL on Instagram and Messenger. */
+  mediaRef: string | null;
+  mediaMime: string | null;
 };
 export type StatusUpdate = { type: 'status'; external: string; status: 'sent' | 'delivered' | 'read' | 'failed'; error: string | null };
 export type WebhookEvent = InboundMessage | StatusUpdate;
@@ -65,6 +68,7 @@ function whatsapp(entry: Json, out: WebhookEvent[]) {
         contactName: names.get(from) || null, phone: `+${from.replace(/\D/g, '')}`, messageExternal: id,
         msgKind: t === 'text' || t === 'button' || t === 'interactive' ? 'text' : MEDIA.has(t) ? (t as InboundMessage['msgKind']) : 'other',
         body, sentAt: iso(m.timestamp),
+        mediaRef: MEDIA.has(t) ? str(media.id) || null : null, mediaMime: MEDIA.has(t) ? str(media.mime_type) || null : null,
       });
     }
     for (const s of arr(value.statuses)) {
@@ -91,6 +95,7 @@ function pageOrInstagram(kind: 'messenger' | 'instagram', entry: Json, out: Webh
       type: 'message', kind, channelExternal: account, contactExternal: sender, contactName: null, phone: null,
       messageExternal: mid, msgKind: str(message.text) ? 'text' : MEDIA.has(at) ? (at as InboundMessage['msgKind']) : at === 'file' ? 'document' : 'other',
       body: str(message.text), sentAt: iso(ev.timestamp, true),
+      mediaRef: attachment ? str((attachment.payload as Json | undefined)?.url) || null : null, mediaMime: null,
     });
   }
 }

@@ -10,9 +10,14 @@ Apply the migrations in `supabase/migrations/` in order, then deploy the three f
 
 | Secret | Needed for | Value |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | AI replies | Key from the Anthropic Console |
-| `AI_MODEL` | optional | Everyday model. Default `claude-haiku-5-5` |
-| `AI_MODEL_ESCALATION` | optional | Stronger model used when the everyday one fails, e.g. `claude-sonnet-5-5` |
+| `GEMINI_API_KEY` | AI replies, long voice notes | Paid-tier key from Google AI Studio. The default provider |
+| `SARVAM_API_KEY` | voice notes | Key from the Sarvam dashboard. Transcribes voice notes up to 30 seconds with Saaras v4 |
+| `ANTHROPIC_API_KEY` | optional | Only if you switch the AI to Claude |
+| `AI_MODEL` | optional | Everyday model. Default `gemini-3.5-flash-lite`. A `claude-…` name switches the provider to Anthropic |
+| `AI_MODEL_ESCALATION` | optional | Stronger model of the same provider, used when the everyday one fails, e.g. `gemini-3.6-flash` |
+| `AI_PROVIDER` | optional | `gemini` or `anthropic`, to force a provider |
+| `AI_THINKING_LEVEL` | optional | Gemini thinking level. Default `minimal`, for fast chat replies |
+| `STT_MODEL` | optional | Sarvam speech model. Default `saaras:v4` |
 | `META_APP_SECRET` | receiving messages | App secret from the Meta app dashboard |
 | `META_VERIFY_TOKEN` | webhook setup | Any long random string; type the same one into Meta |
 | `META_GRAPH_VERSION` | optional | Graph API version. Default `v24.0`; set it to the version your Meta app uses |
@@ -20,7 +25,7 @@ Apply the migrations in `supabase/migrations/` in order, then deploy the three f
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are provided by Supabase.
 
-With only `ANTHROPIC_API_KEY` set, the AI already works on sample chats (Settings → Add sample chats, open a chat, switch on "Type as the customer").
+With only `GEMINI_API_KEY` set, the AI already works on sample chats (Settings → Add sample chats, open a chat, switch on "Type as the customer").
 
 ### Auth
 

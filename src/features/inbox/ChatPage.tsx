@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Clock, Send } from 'lucide-react';
+import { ChevronLeft, Clock, Mic, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { useWorkspace } from '../../app/workspace';
@@ -9,7 +9,7 @@ import { formatTime } from '../../lib/dates';
 import { errorMessage } from '../../lib/errors';
 import { conversationsQuery, messagesQuery } from '../../lib/sections';
 import { rpc, supabase } from '../../lib/supabase';
-import type { Conversation, Message } from '../../lib/types';
+import { CHANNEL_LABEL, type Conversation, type Message } from '../../lib/types';
 
 const BY: Record<Message['sender'], string> = { contact: '', ai: 'AI', staff: 'Team', system: '' };
 const STATUS: Partial<Record<Message['status'], string>> = { queued: 'sending', delivered: 'delivered', read: 'read', failed: 'not delivered' };
@@ -128,7 +128,12 @@ export function ChatPage() {
         {conv.handoff_reason && <Notice tone="warn">The AI handed this chat to you: {conv.handoff_reason}</Notice>}
         {shown.map((m) => (
           <div key={m.id} className={`bubble ${m.sender === 'system' ? 'system' : m.direction} ${m.status === 'failed' ? 'failed' : ''}`}>
-            {m.body || `[${m.kind}]`}
+            {m.kind === 'audio' && m.direction === 'in' ? (
+              <>
+                <span className="voice-tag"><Mic size={14} aria-hidden /> Voice note{m.transcribed_by ? ', written out' : ''}</span>
+                {m.body || <em>Could not be written out. Listen to it in {CHANNEL_LABEL[conv.channels.kind]}.</em>}
+              </>
+            ) : (m.body || `[${m.kind}]`)}
             {m.sender !== 'system' && (
               <span className="by">{[BY[m.sender], formatTime(m.created_at, ws.timezone), m.direction === 'out' ? STATUS[m.status] : ''].filter(Boolean).join(' · ')}
                 {m.status === 'failed' && m.error ? ` · ${m.error}` : ''}</span>

@@ -4,7 +4,7 @@ WhatsApp, Instagram and Facebook Messenger in one inbox, answered by an AI that 
 
 - App: React 19, Vite, TypeScript. Hosted on GitHub Pages.
 - Backend: Supabase (Postgres with row level security, Edge Functions, Realtime), Mumbai region.
-- AI: Anthropic Messages API behind a small model router (`supabase/functions/_shared/llm.ts`).
+- AI: Google Gemini by default, Anthropic optional, behind a small model router (`supabase/functions/_shared/llm.ts`). Voice notes are transcribed with Sarvam Saaras, with Gemini as the fallback (`_shared/voice.ts`).
 
 ## How it fits together
 
