@@ -44,7 +44,7 @@ begin
     ('Arjun Das',      '+919000010004', 'whatsapp',  'won',       90, 'Annual package',            2200000, 'Annual package', 1,  1500,  'Paid by UPI', null),
     ('Sneha Thomas',   null,            'messenger', 'qualified', 70, 'Corporate plan, 40 people', 10000000, null,            0,  260,   'We are 40 people. Any corporate rate?', 'Deal above your ₹50,000 limit'),
     ('Vishnu Prasad',  '+919000010006', 'whatsapp',  'new',       30, 'Asked about timings',       null,   null,              0,  20,    'What time do you open on Sunday?', null),
-    ('Deepa Suresh',   '+919000010007', 'instagram', 'won',       85, 'Trial session, then Starter', 280000, 'Trial session', 1,  4300,  'See you on Monday', null),
+    ('Deepa Suresh',   '+919000010007', 'instagram', 'won',       85, 'Trial session',             30000, 'Trial session', 1,  4300,  'See you on Monday', null),
     ('Mohammed Shafi', '+919000010008', 'whatsapp',  'lost',      40, 'Premium package',           650000, null,              0,  7200,  'Too far from my place, sorry', null),
     ('Priya Nair',     '+919000010009', 'messenger', 'proposal',  75, 'Welcome kit x 3',           299700, 'Welcome kit',     3,  600,   'Deliver to Aluva please', null),
     ('Akhil Raj',      null,            'instagram', 'new',       45, 'Saw the reel, asked price', null,   null,              0,  50,    'Price?', null),
