@@ -18,6 +18,7 @@ Apply the migrations in `supabase/migrations/` in order, then deploy the three f
 | `AI_PROVIDER` | optional | `gemini` or `anthropic`, to force a provider |
 | `AI_THINKING_LEVEL` | optional | Gemini thinking level. Default `minimal`, for fast chat replies |
 | `STT_MODEL` | optional | Sarvam speech model. Default `saaras:v4` |
+| `STT_LANGUAGE_HINT` | optional | Language customers mostly speak, for long voice notes read by Gemini. Default `Malayalam` |
 | `META_APP_SECRET` | receiving messages | App secret from the Meta app dashboard |
 | `META_VERIFY_TOKEN` | webhook setup | Any long random string; type the same one into Meta |
 | `META_GRAPH_VERSION` | optional | Graph API version. Default `v24.0`; set it to the version your Meta app uses |

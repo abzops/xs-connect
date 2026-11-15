@@ -63,13 +63,13 @@ function base64(bytes: Uint8Array): string {
 }
 
 const NO_SPEECH = '[no speech]';
-export async function geminiTranscribe(apiKey: string, a: Audio, model: string, fetcher: typeof fetch = fetch): Promise<{ text: string } | { error: string }> {
+export async function geminiTranscribe(apiKey: string, a: Audio, model: string, fetcher: typeof fetch = fetch, hint = 'Malayalam'): Promise<{ text: string } | { error: string }> {
   const res = await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
     body: JSON.stringify({
       contents: [{ role: 'user', parts: [
         { inlineData: { mimeType: a.mime === 'audio/opus' ? 'audio/ogg' : a.mime, data: base64(a.bytes) } },
-        { text: `Write down exactly what is said in this voice note, in the language and script the speaker uses (Malayalam in Malayalam script; English words in English). Write digits for numbers. Output only the words spoken, with no notes or translation. If there is no speech, output ${NO_SPEECH}.` },
+        { text: `Write down exactly what is said in this voice note. The speaker is most likely speaking ${hint}, often mixed with English words; do not mistake it for a neighbouring language. Use the script of the language spoken (Malayalam in Malayalam script; English words in English). Write digits for numbers, one digit at a time for phone numbers. Output only the words spoken, with no notes or translation. If there is no speech, output ${NO_SPEECH}.` },
       ] }],
       generationConfig: { temperature: 0, maxOutputTokens: 2048 },
     }),
@@ -81,7 +81,7 @@ export async function geminiTranscribe(apiKey: string, a: Audio, model: string, 
 }
 
 /** Sarvam first, Gemini when Sarvam cannot (too long, down, or no key). */
-export async function transcribe(a: Audio, keys: { sarvam?: string; gemini?: string; sarvamModel?: string; geminiModel?: string }, fetcher: typeof fetch = fetch): Promise<Transcript> {
+export async function transcribe(a: Audio, keys: { sarvam?: string; gemini?: string; sarvamModel?: string; geminiModel?: string; languageHint?: string }, fetcher: typeof fetch = fetch): Promise<Transcript> {
   const errors: string[] = [];
   if (keys.sarvam) {
     const model = keys.sarvamModel || 'saaras:v4';
@@ -91,7 +91,7 @@ export async function transcribe(a: Audio, keys: { sarvam?: string; gemini?: str
   }
   if (keys.gemini) {
     const model = keys.geminiModel || 'gemini-3.5-flash-lite';
-    const r = await geminiTranscribe(keys.gemini, a, model, fetcher).catch((e) => ({ error: e instanceof Error ? e.message : 'Gemini failed' }));
+    const r = await geminiTranscribe(keys.gemini, a, model, fetcher, keys.languageHint || 'Malayalam').catch((e) => ({ error: e instanceof Error ? e.message : 'Gemini failed' }));
     if ('text' in r) return { text: r.text, by: model };
     errors.push(r.error);
   }

@@ -117,7 +117,7 @@ export async function transcribeVoice(db: SupabaseClient, messageId: string): Pr
     const gem = (Deno.env.get('AI_MODEL') ?? '').startsWith('gemini') ? Deno.env.get('AI_MODEL') : undefined;
     const t = await transcribe(audio, {
       sarvam: Deno.env.get('SARVAM_API_KEY'), gemini: Deno.env.get('GEMINI_API_KEY'),
-      sarvamModel: Deno.env.get('STT_MODEL'), geminiModel: gem,
+      sarvamModel: Deno.env.get('STT_MODEL'), geminiModel: gem, languageHint: Deno.env.get('STT_LANGUAGE_HINT'),
     });
     if (!t.text) { console.error('voice note', messageId, t.error); return { ok: false, detail: t.error }; }
     await call(db, 'service_set_transcript', { p_message: messageId, p_body: t.text, p_by: t.by });
