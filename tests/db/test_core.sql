@@ -136,5 +136,12 @@ select t.eq((select status from public.staff_send_message(t.id('wsB'), t.id('dem
 select t.eq((public.workspace_overview(t.id('wsB'), 30)->>'leads_open')::int, 3, 'overview counts leads');
 
 reset role;
+-- ------------------------------------------------------------ pitch demo (administrator only)
+select t.eq(private.seed_pitch(t.id('wsB')), 'seeded 12 conversations', 'pitch demo seeds');
+select t.eq(private.seed_pitch(t.id('wsB')), 'already seeded', 'pitch demo seeds once');
+select t.eq((select count(*)::int from public.orders where workspace_id = t.id('wsB') and status in ('paid','fulfilled')), 4, 'pitch demo has paid orders');
+set role authenticated;
+select t.fails($$select private.seed_pitch(t.id('wsB'))$$, 'permission denied', 'staff cannot run the pitch seed');
+reset role;
 \o
 \echo all database tests passed
