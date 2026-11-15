@@ -67,4 +67,3 @@ button.item, .item.plain-btn { width: 100%; background: none; border: 0; text-al
 .bars .track { height: 8px; border-radius: 999px; background: var(--paper-2); overflow: hidden; }
 .bars .fill { display: block; height: 100%; border-radius: 999px; background: var(--ink); min-width: 2px; }
 .codebox { font-family: var(--mono); font-size: var(--t-sm); background: var(--paper-2); border-radius: var(--r); padding: 10px 12px; overflow-wrap: anywhere; user-select: all; }
-.lp .chat-demo { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
