@@ -34,7 +34,6 @@ export function HomePage() {
     { done: (profile.data?.about.trim().length ?? 0) > 20, text: 'Tell the AI about your business', to: `${base}/brain` },
     { done: (catalog.data?.length ?? 0) > 0, text: 'Add your products or services with prices', to: `${base}/brain` },
     { done: live, text: 'Connect WhatsApp, Instagram or Facebook', to: `${base}/settings` },
-    { done: !!profile.data?.autopilot, text: 'Turn on autopilot when the drafts look right', to: `${base}/brain` },
   ];
   const setupLeft = steps.filter((s) => !s.done).length;
   const waiting = (conversations.data ?? []).filter((c) => c.status === 'open' && (c.handoff_reason || (!c.ai_enabled && c.unread > 0))).slice(0, 5);

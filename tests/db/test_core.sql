@@ -44,7 +44,7 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
 insert into t.ids select 'wsA', (public.create_workspace('Brand A', '9000000000', 'retail')).id;
 select t.eq((select slug from public.workspaces where id = t.id('wsA')), 'brand-a', 'slug from name');
 select t.eq((select count(*)::int from public.workspace_staff), 1, 'owner sees own staff row');
-select t.eq((select autopilot from public.brand_profiles where workspace_id = t.id('wsA')), false, 'new brands start in shadow mode');
+select t.eq((select autopilot from public.brand_profiles where workspace_id = t.id('wsA')), true, 'new brands reply on their own');
 insert into t.ids select 'itemA', (public.save_catalog_item(t.id('wsA'), null, 'product', 'Blue kurta', null, 129900, 'each', true, 'active')).id;
 select public.save_knowledge_item(t.id('wsA'), null, 'Delivery time', 'We deliver in 3 days across Kerala.', 'active');
 insert into t.ids select 'chA', (public.save_channel(t.id('wsA'), 'whatsapp', '1111', 'Brand A WhatsApp', 'token-token-token-token-token')).id;
@@ -78,9 +78,10 @@ select t.eq((public.service_agent_context(t.id('convA'))->>'run')::boolean, true
 select t.eq(jsonb_array_length(public.service_agent_context(t.id('convA'))->'catalog'), 1, 'context carries the catalog');
 select t.eq(public.service_search_knowledge(t.id('convA'), 'delivery')->0->>'title', 'Delivery time', 'knowledge search');
 
--- Shadow mode: reply becomes a draft.
+-- Approval mode (autopilot off): the reply becomes a draft.
+update public.brand_profiles set autopilot = false where workspace_id = t.id('wsA');
 insert into t.ids select 'lastIn', (public.service_agent_context(t.id('convA'))->>'last_message_id')::uuid;
-select t.eq(public.service_ai_reply(t.id('convA'), 'Yes, ₹1,299.', t.id('lastIn'))->>'status', 'draft', 'shadow mode drafts');
+select t.eq(public.service_ai_reply(t.id('convA'), 'Yes, ₹1,299.', t.id('lastIn'))->>'status', 'draft', 'approval mode drafts');
 select t.eq(public.service_ai_reply(t.id('convA'), 'Late reply', gen_random_uuid())->>'stale', 'true', 'stale reply is dropped');
 
 -- Orders: price comes from the catalog, never from the AI.

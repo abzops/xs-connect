@@ -227,14 +227,14 @@ function Story() {
 /* ------------------------------------------------------------- approvals */
 
 function Approvals() {
-  const [auto, setAuto] = useState(false);
+  const [auto, setAuto] = useState(true);
   const [sent, setSent] = useState(false);
   return (
     <section id="control" className="control">
       <div className="wrap control-in">
         <div className="control-copy">
-          <h2>Drafts until you trust the AI.</h2>
-          <p>A new brand starts with autopilot off. The AI writes each reply and a person on your team approves it. Switch autopilot on when the drafts read right, and take any chat back with one tap.</p>
+          <h2>It replies on its own. You decide how far.</h2>
+          <p>The AI answers customers straight away. If you would rather read every reply first, switch approval on and nothing goes out until a person on your team sends it. Take any chat back with one tap.</p>
           <ul>
             <li>Set a deal amount above which a person always replies</li>
             <li>Write the promises the AI must never make</li>
@@ -243,7 +243,7 @@ function Approvals() {
         </div>
         <div className="control-ui" aria-label="Try the draft approval">
           <button className="switch-l" aria-pressed={auto} onClick={() => { setAuto((a) => !a); setSent(false); }}>
-            <i aria-hidden /> <span>Autopilot</span> <b>{auto ? 'On' : 'Off'}</b>
+            <i aria-hidden /> <span>AI sends on its own</span> <b>{auto ? 'On' : 'Off'}</b>
           </button>
           <div className="b in">Is the 3 month plan refundable?</div>
           {auto || sent ? (
@@ -284,8 +284,8 @@ const GROUPS: { name: string; items: [string, string][] }[] = [
     ['Follow-ups', 'Reminders for people who went quiet, on your team’s list when the AI may not write.'],
   ] },
   { name: 'You stay in charge', items: [
-    ['Drafts first', 'New brands start with the AI writing drafts that a person approves.'],
-    ['Autopilot', 'Switch it on when the drafts look right. Switch it off any time.'],
+    ['Replies on its own', 'The AI answers straight away, day or night.'],
+    ['Approval when you want it', 'Switch it on and every reply waits as a draft for a person to send.'],
     ['Take over', 'One tap in any chat and the AI stops.'],
     ['Deal limit', 'Above the amount you set, a person always handles it.'],
     ['Test before you connect', 'Sample chats let you play the customer and watch the AI answer.'],
@@ -320,7 +320,7 @@ function Who() {
 
 const FAQ: [string, string][] = [
   ['Can the AI quote a wrong price?', 'It can only quote prices on your price list, and an order total is calculated from that list by the system, not by the AI.'],
-  ['Can I check replies before they go out?', 'Yes. Every new brand starts with autopilot off: the AI writes a draft and a person approves it. You switch autopilot on when you trust it.'],
+  ['Can I check replies before they go out?', 'Yes. By default the AI replies on its own. Switch approval on and it writes a draft for each message that a person sends.'],
   ['Does it work in Malayalam?', 'It replies in the language the customer writes in, including Malayalam and Manglish.'],
   ['What counts as one conversation?', 'One customer in one day, however many messages they send. You are never charged twice for the same customer on the same day.'],
   ['Are WhatsApp’s own charges included?', 'No. Meta bills WhatsApp message charges to your own WhatsApp Business account. Instagram and Messenger messages have no Meta charge.'],

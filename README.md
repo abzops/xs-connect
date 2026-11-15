@@ -27,7 +27,7 @@ Rules the code enforces:
 
 - Every write goes through a database command function that checks permission. API roles can only read, through RLS. Edge functions use `service_*` functions that only the service role may call.
 - Order totals come from the price list in the database, never from the model.
-- New brands start in shadow mode (`autopilot = false`): the AI writes drafts and a person sends them.
+- The AI replies on its own by default (`autopilot = true`). A brand can switch approval on, and then the AI writes drafts that a person sends.
 - The AI may reply only inside Meta's 24 hour window. After that, a person may reply on Instagram and Messenger for up to 7 days (Human Agent tag); WhatsApp needs an approved template.
 - The webhook fails closed: no `META_APP_SECRET`, or a bad signature, and nothing is accepted.
 - Usage is metered once per customer per day (one "AI conversation"), free trial first, then the wallet.

@@ -42,7 +42,7 @@ function ProfileForm() {
   const q = useQuery(profileQuery(ws.id));
   const [form, setForm] = useState<Record<string, string>>({});
   const [limit, setLimit] = useState('');
-  const [autopilot, setAutopilot] = useState(false);
+  const [autopilot, setAutopilot] = useState(true);
   useEffect(() => {
     if (!q.data) return;
     setForm(Object.fromEntries(FIELDS.map((f) => [f.key, String(q.data[f.key] ?? '')])));
@@ -64,11 +64,11 @@ function ProfileForm() {
     <form className="stack lg" onSubmit={(e) => { e.preventDefault(); if (!badLimit && editable) save.mutate(); }}>
       <section className="card stack">
         <button type="button" className="switch" aria-pressed={autopilot} disabled={!editable} onClick={() => setAutopilot((v) => !v)}>
-          <i aria-hidden /> Autopilot: the AI sends replies on its own
+          <i aria-hidden /> The AI sends replies on its own
         </button>
         <p className="muted" style={{ margin: 0 }}>
-          {autopilot ? 'The AI replies to customers directly and hands over when it is unsure.'
-            : 'Off: the AI writes a draft for every message and a person approves it. Start here, switch on when the drafts look right.'}
+          {autopilot ? 'On: the AI replies to customers straight away and hands over to your team when it is unsure.'
+            : 'Off: the AI writes a draft for every message and nothing is sent until a person approves it.'}
         </p>
         <Field label="Hand over to a person above (₹)" hint="Orders larger than this always go to your team. Leave empty for no limit." error={badLimit ? 'Enter a number, like 10000.' : null}>
           <input className="input" inputMode="decimal" value={limit} disabled={!editable} onChange={(e) => setLimit(e.target.value)} />
