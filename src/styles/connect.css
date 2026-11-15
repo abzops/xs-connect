@@ -26,7 +26,7 @@
 button.item, .item.plain-btn { width: 100%; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
 
 /* ---------- Chat ---------- */
-.chat { display: flex; flex-direction: column; height: calc(100dvh - 64px); min-height: 420px; background: var(--paper); border-radius: var(--r-lg); overflow: hidden; }
+.chat { display: flex; flex-direction: column; height: calc(100dvh - 90px); min-height: 420px; background: var(--paper); border-radius: var(--r-lg); overflow: hidden; }
 .chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--hair); }
 .chat-head .who { flex: 1; min-width: 0; display: grid; }
 .chat-head .who strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
