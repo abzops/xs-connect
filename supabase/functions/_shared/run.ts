@@ -50,6 +50,8 @@ function toolRunner(db: SupabaseClient, conversationId: string) {
         if (Number.isNaN(due.getTime())) return { error: 'due_at is not a valid date' };
         return call(db, 'service_create_followup', { p_conversation: conversationId, p_due_at: due.toISOString(), p_note: String(i.note ?? '') });
       }
+      case 'set_language':
+        return call(db, 'service_set_language', { p_conversation: conversationId, p_language: String(i.language ?? '') });
       case 'handoff_to_human':
         return call(db, 'service_handoff', { p_conversation: conversationId, p_reason: String(i.reason ?? 'Needs a person') });
       default:

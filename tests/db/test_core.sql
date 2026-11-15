@@ -155,6 +155,13 @@ set role authenticated;
 select t.fails($$select public.service_voice_target(t.id('voice'))$$, 'permission denied', 'staff cannot read channel tokens through the transcriber');
 
 reset role;
+-- ------------------------------------------------------------ customer language
+set role service_role;
+select t.eq(public.service_set_language(t.id('convA'), 'Hindi')->>'error', 'language must be english or malayalam', 'only the two offered languages');
+select t.eq(public.service_set_language(t.id('convA'), ' Malayalam ')->>'language', 'malayalam', 'the choice is saved');
+select t.eq((select k.language from public.contacts k join public.conversations c on c.contact_id = k.id where c.id = t.id('convA')), 'malayalam', 'on the contact, so it holds on every channel');
+
+reset role;
 -- ------------------------------------------------------------ pitch demo (administrator only)
 select t.eq(private.seed_pitch(t.id('wsB')), 'seeded 12 conversations', 'pitch demo seeds');
 select t.eq(private.seed_pitch(t.id('wsB')), 'already seeded', 'pitch demo seeds once');

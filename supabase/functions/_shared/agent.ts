@@ -11,7 +11,7 @@ export type AgentContext = {
     never_say: string; handoff_above_paise: number | null; autopilot: boolean;
   };
   catalog: { id: string; kind: string; name: string; description: string | null; price_paise: number; unit: string | null; in_stock: boolean }[];
-  contact: { name: string; phone: string | null };
+  contact: { name: string; phone: string | null; language?: 'english' | 'malayalam' | null };
   lead: { stage: string; score: number; need: string | null; budget_paise: number | null } | null;
   messages: { direction: 'in' | 'out'; sender: string; kind: string; body: string }[];
 };
@@ -26,13 +26,19 @@ export function buildSystemPrompt(ctx: AgentContext, now: Date): string {
     : '(no items listed yet)';
   const channelRule = ctx.channel.kind === 'whatsapp' ? ''
     : `\n- This chat is on ${ctx.channel.kind === 'instagram' ? 'Instagram' : 'Facebook Messenger'}, where we can only reply for 24 hours. Early in the chat, politely ask for the customer's WhatsApp number so the team can stay in touch, and save it with update_lead.`;
+  const lang = ctx.contact.language;
+  const languageRule = lang === 'malayalam'
+    ? `- The customer chose Malayalam. Write every reply fully in Malayalam, in Malayalam script and in plain everyday words, even when they type in English letters. Only item names and prices stay exactly as in the price list. If they ask to change language, call set_language and switch.`
+    : lang === 'english'
+    ? `- The customer chose English. Write every reply fully in English, even when they write in Malayalam. If they ask to change language, call set_language and switch.`
+    : `- The customer has not chosen a language yet. If their message clearly states the choice (for example "Malayalam mathi" or "English please"), call set_language and then help them fully in that language. Otherwise your whole reply is one short, polite message that greets them and asks for their preferred language in both languages, like this: "Hello! Could you please tell me your preferred language, Malayalam or English?\nനമസ്കാരം! താങ്കൾക്ക് ഏത് ഭാഷയിലാണ് സംസാരിക്കാൻ താൽപര്യം, മലയാളമോ English-ഓ?" Do not answer their question yet. When they choose, call set_language and then answer what they asked before, fully in the chosen language.`;
   return `You are the sales and support assistant for "${ctx.workspace.name}". You chat with customers on behalf of this business only.
 ${section('About the business', p.about)}${section('Services and solutions', p.services)}${section('Current offers', p.offers)}${section('Working hours', p.hours)}${section('Location and delivery', p.location)}${section('Policies', p.policies)}
 ## Price list (the only prices you may quote)
 ${catalog}
 ${section('Tone', p.tone)}${section('Never say or promise', p.never_say)}
 ## How to work
-- Reply in the customer's language and in the script they wrote in. Malayalam script gets a reply in Malayalam script; Manglish (Malayalam typed in English letters) gets Manglish; English gets English; the same for Hindi, Tamil and others. Never mix two scripts for the same language in one reply. Item names and prices stay exactly as in the price list.
+${languageRule}
 - Keep replies short, like a chat message: one to three sentences, one question at a time. No markdown.
 - Act like a good salesperson: understand what they need, recommend the right item, answer doubts, and move towards an order or booking.
 - As you learn the customer's name, what they want, or their budget, save it with update_lead. Raise the score as they show buying intent.
@@ -89,6 +95,8 @@ export const TOOLS = [
       note: { type: 'string', description: 'Delivery address or other details' } }, required: ['items'] } },
   { name: 'schedule_followup', description: 'Remind the team (or yourself, inside 24 hours) to follow up with this customer.',
     input_schema: { type: 'object', properties: { due_at: { type: 'string', description: 'ISO 8601 date and time with timezone offset' }, note: { type: 'string' } }, required: ['due_at', 'note'] } },
+  { name: 'set_language', description: "Save the language this customer chose. Every later reply is written fully in it.",
+    input_schema: { type: 'object', properties: { language: { type: 'string', enum: ['english', 'malayalam'] } }, required: ['language'] } },
   { name: 'handoff_to_human', description: 'Hand this chat to the team. After calling it, tell the customer a team member will reply soon.',
     input_schema: { type: 'object', properties: { reason: { type: 'string', description: 'One short sentence for the team' } }, required: ['reason'] } },
 ] as const;

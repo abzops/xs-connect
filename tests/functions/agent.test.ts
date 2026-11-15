@@ -86,3 +86,18 @@ describe('voice notes in the chat history', () => {
     expect(buildSystemPrompt(ctx, new Date())).toContain('[Voice note] are automatic transcripts');
   });
 });
+
+describe('the customer picks the language', () => {
+  it('asks politely, in both languages, before anything else', () => {
+    const prompt = buildSystemPrompt(ctx, new Date());
+    expect(prompt).toContain('has not chosen a language yet');
+    expect(prompt).toContain('Could you please tell me your preferred language, Malayalam or English?');
+    expect(prompt).toContain('മലയാളമോ English-ഓ?');
+  });
+  it('keeps to the chosen language', () => {
+    expect(buildSystemPrompt({ ...ctx, contact: { ...ctx.contact, language: 'malayalam' } }, new Date())).toContain('Write every reply fully in Malayalam, in Malayalam script');
+    const en = buildSystemPrompt({ ...ctx, contact: { ...ctx.contact, language: 'english' } }, new Date());
+    expect(en).toContain('Write every reply fully in English');
+    expect(en).not.toContain('has not chosen a language yet');
+  });
+});
