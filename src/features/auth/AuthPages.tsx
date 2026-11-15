@@ -101,7 +101,7 @@ export function LoginPage() {
   }
 
   const title = mode === 'signin' ? 'Sign in to XS Connect' : mode === 'signup' ? 'Create your account' : 'Reset password';
-  const sub = mode === 'signin' ? 'Welcome back.' : mode === 'signup' ? '30 days free. Every feature.' : 'We’ll email you a link.';
+  const sub = mode === 'signin' ? 'Welcome back.' : mode === 'signup' ? 'First 100 AI conversations free.' : 'We’ll email you a link.';
   const action = mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send link';
   const ready = !!email && (mode === 'reset' || !!password) && (mode !== 'signup' || !!name.trim());
 

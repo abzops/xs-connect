@@ -17,6 +17,8 @@ export function errorMessage(error: unknown): string {
   if (/Email not confirmed/i.test(raw)) return 'Confirm your email first — check your inbox for the link.';
   if (/User already registered/i.test(raw)) return 'An account with this email already exists. Sign in instead.';
   if (/Password should be/i.test(raw)) return 'Use a password of at least 8 characters.';
+  if (/email rate limit/i.test(raw)) return 'We cannot send more sign-up emails right now. Try again in an hour.';
+  if (/Email address .* is invalid/i.test(raw)) return 'This email address cannot receive mail. Use an address with a working inbox.';
   if (/rate limit/i.test(raw)) return 'Too many attempts. Wait a minute and try again.';
   if (e?.code === '42501' || /permission denied/i.test(raw)) return 'You do not have permission to do this.';
   return 'Something went wrong. Please try again.';
