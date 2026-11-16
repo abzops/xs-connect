@@ -444,6 +444,9 @@ export function LandingPage() {
         <div className="wrap foot-in">
           <Logo onDark width={104} />
           <span>XS Connect by Xelorsoft</span>
+          <a href={`${import.meta.env.BASE_URL}privacy`}>Privacy</a>
+          <a href={`${import.meta.env.BASE_URL}terms`}>Terms</a>
+          <a href={`${import.meta.env.BASE_URL}data-deletion`}>Delete your data</a>
           <span>© 2026 Xelorsoft</span>
         </div>
       </footer>

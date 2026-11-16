@@ -239,3 +239,5 @@ html.on-landing { scrollbar-width: none; scroll-behavior: smooth; background: #1
 html.on-landing::-webkit-scrollbar, html.on-landing body::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) { html.on-landing { scroll-behavior: auto; } }
 @media (hover: hover) { .lp2 .lbtn:hover { transform: translateY(-1px); } .lp2 .lbtn:active { transform: scale(0.97); } }
+.lp2 .foot-in a { color: inherit; text-decoration: none; }
+.lp2 .foot-in a:hover { text-decoration: underline; }

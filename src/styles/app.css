@@ -559,3 +559,16 @@ body:has(.overlay) .toasts { top: calc(12px + env(safe-area-inset-top)); bottom:
     width: 40px; height: 40px; min-height: 40px; padding: 0; margin-right: -4px;
     border: 0; background: transparent; color: var(--graphite); border-radius: 50%; cursor: pointer; }
 }
+
+/* Privacy, terms and data deletion pages */
+.legal { max-width: 720px; margin: 0 auto; padding: 24px 20px 64px; line-height: 1.6; }
+.legal-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-bottom: 20px; margin-bottom: 28px; border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent); }
+.legal-nav a { color: var(--ink); text-decoration: none; font-weight: 600; }
+.legal-nav span { display: flex; gap: 18px; }
+.legal-nav span a { font-weight: 400; color: var(--graphite); }
+.legal h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 6px; }
+.legal h2 { font-size: 1.125rem; margin: 32px 0 8px; }
+.legal-meta { color: var(--graphite); margin-top: 0; }
+.legal ul, .legal ol { padding-left: 1.3em; }
+.legal li { margin-bottom: 6px; }
+.legal a { color: var(--primary); }

@@ -20,6 +20,7 @@ import { HomePage } from './features/home/HomePage';
 import { ChatPage } from './features/inbox/ChatPage';
 import { InboxPage } from './features/inbox/InboxPage';
 import { LandingPage } from './features/landing/LandingPage';
+import { DataDeletionPage, PrivacyPage, TermsPage } from './features/legal/LegalPages';
 import { errorMessage } from './lib/errors';
 
 // Less frequent screens load on demand to keep the first load small.
@@ -101,6 +102,9 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<Root />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/data-deletion" element={<DataDeletionPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/setup" element={<SetupBrand />} />
         <Route path="/b/:slug" element={<WorkspaceLayout />}>
