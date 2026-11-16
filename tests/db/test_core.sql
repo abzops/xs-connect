@@ -162,6 +162,21 @@ select t.eq(public.service_set_language(t.id('convA'), ' Malayalam ')->>'languag
 select t.eq((select k.language from public.contacts k join public.conversations c on c.contact_id = k.id where c.id = t.id('convA')), 'malayalam', 'on the contact, so it holds on every channel');
 
 reset role;
+-- ------------------------------------------------------------ easy connect
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select t.eq(public.check_permission(t.id('wsA'), 'channels.manage'), true, 'owner may connect channels');
+select t.eq(public.check_permission(t.id('wsB'), 'channels.manage'), false, 'not in another brand');
+select t.fails($$select public.request_channel_setup(t.id('wsA'), 'whatsapp', '123')$$, 'enter a phone number we can call', 'help request needs a phone number');
+select public.request_channel_setup(t.id('wsA'), 'whatsapp', '+91 98470 00000');
+select public.request_channel_setup(t.id('wsA'), 'whatsapp', '98470 11111');
+select t.eq((select count(*)::int from public.setup_requests where workspace_id = t.id('wsA') and status = 'open'), 1, 'asking again refreshes one request');
+select t.eq((select phone from public.setup_requests where workspace_id = t.id('wsA')), '9847011111', 'latest phone kept');
+select t.fails($$select public.request_channel_setup(t.id('wsB'), 'whatsapp', '9847000000')$$, 'permission', 'cannot ask for another brand');
+select public.save_channel(t.id('wsA'), 'whatsapp', '5550001', 'Shop', repeat('t', 30));
+select t.eq((select status from public.setup_requests where workspace_id = t.id('wsA') and kind = 'whatsapp'), 'done', 'connecting closes the request');
+
+reset role;
 -- ------------------------------------------------------------ pitch demo (administrator only)
 select t.eq(private.seed_pitch(t.id('wsB')), 'seeded 12 conversations', 'pitch demo seeds');
 select t.eq(private.seed_pitch(t.id('wsB')), 'already seeded', 'pitch demo seeds once');

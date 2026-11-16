@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.ai-agent]
 verify_jwt = false
+
+[functions.connect-whatsapp]
+verify_jwt = false

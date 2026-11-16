@@ -4,19 +4,16 @@ import { useState } from 'react';
 import { useAuth } from '../../app/auth';
 import { useWorkspace } from '../../app/workspace';
 import { AppearanceControl } from '../../components/Appearance';
+import { ConnectSheet } from './ConnectSheet';
 import { ChannelChip } from '../../components/bits';
-import { Empty, Field, Loading, Notice, Sheet, useToast } from '../../components/ui';
+import { Empty, Loading, Notice, useToast } from '../../components/ui';
 import { errorMessage } from '../../lib/errors';
 import { formatINR } from '../../lib/money';
 import { channelsQuery, staffQuery, walletQuery } from '../../lib/sections';
 import { rpc } from '../../lib/supabase';
-import { CHANNEL_LABEL, ROLE_LABEL, type Channel, type ChannelKind } from '../../lib/types';
+import { ROLE_LABEL, type Channel } from '../../lib/types';
 
 const WEBHOOK = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/meta-webhook`;
-
-const ID_LABEL: Record<ChannelKind, string> = {
-  whatsapp: 'Phone number ID', instagram: 'Instagram account ID', messenger: 'Facebook Page ID',
-};
 
 export function SettingsPage() {
   const { ws, can } = useWorkspace();
@@ -115,37 +112,5 @@ export function SettingsPage() {
 
       {connect && <ConnectSheet onClose={() => setConnect(false)} />}
     </div>
-  );
-}
-
-function ConnectSheet({ onClose }: { onClose: () => void }) {
-  const { ws } = useWorkspace();
-  const qc = useQueryClient();
-  const toast = useToast();
-  const [kind, setKind] = useState<ChannelKind>('whatsapp');
-  const [externalId, setExternalId] = useState('');
-  const [name, setName] = useState('');
-  const [token, setToken] = useState('');
-  const valid = externalId.trim().length > 0 && token.trim().length >= 20;
-  const save = useMutation({
-    mutationFn: () => rpc<Channel>('save_channel', { p_ws: ws.id, p_kind: kind, p_external_id: externalId, p_display_name: name, p_access_token: token.trim() }),
-    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ['channels', ws.id] }); toast(`${CHANNEL_LABEL[kind]} connected`); onClose(); },
-  });
-  return (
-    <Sheet title="Connect a channel" onClose={onClose}>
-      <form className="stack lg" onSubmit={(e) => { e.preventDefault(); if (valid) save.mutate(); }}>
-        <Field label="Channel">
-          <select className="input" value={kind} onChange={(e) => setKind(e.target.value as ChannelKind)}>
-            {Object.entries(CHANNEL_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </Field>
-        <Field label={ID_LABEL[kind]} hint="From your Meta app dashboard."><input className="input" value={externalId} onChange={(e) => setExternalId(e.target.value)} autoComplete="off" /></Field>
-        <Field label="Name shown in the inbox"><input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={`e.g. ${ws.name} ${CHANNEL_LABEL[kind]}`} /></Field>
-        <Field label="Access token" hint="Stored in the database where only the server can read it."><input className="input" type="password" value={token} onChange={(e) => setToken(e.target.value)} autoComplete="off" /></Field>
-        <Notice tone="info">One-tap Meta login arrives after Meta approves the XS Connect app. Until then, connect your own accounts with their ID and token.</Notice>
-        {save.error && <Notice tone="bad">{errorMessage(save.error)}</Notice>}
-        <button className="btn primary block xl" disabled={!valid || save.isPending}>{save.isPending ? <span className="spinner" /> : 'Connect'}</button>
-      </form>
-    </Sheet>
   );
 }

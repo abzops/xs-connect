@@ -17,6 +17,8 @@ Apply the migrations in `supabase/migrations/` in order, then deploy the three f
 | `AI_MODEL_ESCALATION` | optional | Stronger model of the same provider, used when the everyday one fails, e.g. `gemini-3.6-flash` |
 | `AI_PROVIDER` | optional | `gemini` or `anthropic`, to force a provider |
 | `AI_THINKING_LEVEL` | optional | Gemini thinking level. Default `minimal`, for fast chat replies |
+| `META_APP_ID` | one-tap WhatsApp | The XS Connect app's ID in Meta's App Dashboard |
+| `META_CONFIG_ID` | one-tap WhatsApp | The Embedded Signup configuration ID (Facebook Login for Business → Configurations, login variation "WhatsApp Embedded Signup") |
 | `STT_MODEL` | optional | Sarvam speech model. Default `saaras:v4` |
 | `STT_LANGUAGE_HINT` | optional | Language customers mostly speak, for long voice notes read by Gemini. Default `Malayalam` |
 | `META_APP_SECRET` | receiving messages | App secret from the Meta app dashboard |
@@ -58,3 +60,11 @@ Each function's `index.ts` is deployed on its own. Its imports of `../_shared/*.
 `https://raw.githubusercontent.com/abzops/xs-connect/<commit>/supabase/functions/_shared/<file>.ts`
 
 To release a change to shared code: push it, then redeploy the functions with the new commit id in those links. The repository has to stay public for this to work; with a private repository, deploy with the Supabase CLI instead (`supabase functions deploy`).
+
+## Connecting a customer's channel
+
+Customers see three big buttons (WhatsApp, Instagram, Facebook Messenger).
+
+- **WhatsApp, one tap:** once `META_APP_ID`, `META_CONFIG_ID` and `META_APP_SECRET` are set, the customer taps "Connect WhatsApp", logs in with Facebook and scans a QR code in the WhatsApp Business app. Their number stays on their phone (Meta's coexistence mode). This needs Xelorsoft's Meta app to be approved as a Tech Provider.
+- **Call me:** until then, and for Instagram and Messenger, the customer leaves a phone number. Requests appear in the `setup_requests` table (Supabase → Table Editor). Call them and connect the channel with the developer form; the request closes itself when the channel connects.
+- **For developers:** the old ID-and-token form is under a link at the bottom of the screen.

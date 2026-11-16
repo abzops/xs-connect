@@ -10,11 +10,13 @@ function csp(supabaseUrl: string): Plugin {
   const api = new URL(supabaseUrl);
   const policy = [
     "default-src 'self'",
-    "script-src 'self'",
+    // Facebook's SDK opens Meta's WhatsApp sign-up popup (Settings, Connect WhatsApp).
+    "script-src 'self' https://connect.facebook.net",
+    "frame-src https://www.facebook.com https://web.facebook.com https://staticxx.facebook.com",
     "style-src 'self'",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://*.facebook.com https://*.fbcdn.net",
     "font-src 'self'",
-    `connect-src 'self' ${api.origin} wss://${api.host}`,
+    `connect-src 'self' ${api.origin} wss://${api.host} https://*.facebook.com https://connect.facebook.net`,
     "manifest-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
