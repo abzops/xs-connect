@@ -14,9 +14,9 @@
     // /privacy serves privacy/index.html directly, without a redirect.
     "html_handling": "drop-trailing-slash"
   },
-  // The CRM lives at connect.xelorsoft.com; xelorsoft.com is the studio website.
+  // The CRM lives at xsconnect.xelorsoft.com; xelorsoft.com is the studio website.
   "routes": [
-    { "pattern": "connect.xelorsoft.com", "custom_domain": true }
+    { "pattern": "xsconnect.xelorsoft.com", "custom_domain": true }
   ],
   "workers_dev": true,
   "preview_urls": true,
