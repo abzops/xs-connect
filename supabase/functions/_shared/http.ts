@@ -1,7 +1,7 @@
 // Shared HTTP helpers for functions called from the app with a staff login.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const ALLOWED = (Deno.env.get('APP_ORIGINS') ?? 'https://abzops.github.io,https://xs-connect.xelorsoft.workers.dev,https://app.xelorsoft.com,https://xelorsoft.com,https://www.xelorsoft.com,http://localhost:5173,http://127.0.0.1:5173')
+const ALLOWED = (Deno.env.get('APP_ORIGINS') ?? 'https://abzops.github.io,https://xs-connect.xelorsoft.workers.dev,https://connect.xelorsoft.com,http://localhost:5173,http://127.0.0.1:5173')
   .split(',').map((s) => s.trim()).filter(Boolean);
 
 export function cors(req: Request): Record<string, string> {

@@ -32,7 +32,7 @@ With only `GEMINI_API_KEY` set, the AI already works on sample chats (Settings �
 
 ### Auth
 
-In Authentication → URL Configuration, set the Site URL to the app's address (production: `https://app.xelorsoft.com`; GitHub Pages fallback: `https://abzops.github.io/xs-connect/`) and add it to the redirect URLs, so confirmation and password-reset emails link back to the app.
+In Authentication → URL Configuration, set the Site URL to the app's address (production: `https://connect.xelorsoft.com`; GitHub Pages fallback: `https://abzops.github.io/xs-connect/`) and add it to the redirect URLs, so confirmation and password-reset emails link back to the app.
 
 ## 2. Meta app (pilot: your own accounts)
 

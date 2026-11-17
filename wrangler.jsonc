@@ -14,11 +14,9 @@
     // /privacy serves privacy/index.html directly, without a redirect.
     "html_handling": "drop-trailing-slash"
   },
-  // Custom domains on the xelorsoft.com zone (DNS on Cloudflare).
+  // The CRM lives at connect.xelorsoft.com; xelorsoft.com is the studio website.
   "routes": [
-    { "pattern": "app.xelorsoft.com", "custom_domain": true },
-    { "pattern": "xelorsoft.com", "custom_domain": true },
-    { "pattern": "www.xelorsoft.com", "custom_domain": true }
+    { "pattern": "connect.xelorsoft.com", "custom_domain": true }
   ],
   "workers_dev": true,
   "preview_urls": true,
