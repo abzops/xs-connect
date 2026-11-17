@@ -30,6 +30,14 @@ function csp(supabaseUrl: string): Plugin {
   };
 }
 
+// Public by design (row level security protects the data), so builds that are
+// not given them, such as Cloudflare's, still work. Real environment values win.
+const PUBLIC_DEFAULTS: Record<string, string> = {
+  VITE_SUPABASE_URL: 'https://npuhremhnrxxbqckbqrn.supabase.co',
+  VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_OectQugvSkHPQR_u3hx_RA_GlWsPT-M',
+};
+for (const [k, v] of Object.entries(PUBLIC_DEFAULTS)) process.env[k] ??= v;
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const supabaseUrl = env.VITE_SUPABASE_URL ?? '';
